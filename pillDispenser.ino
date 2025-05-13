@@ -1,9 +1,13 @@
 #include <Servo.h>
+#include "Adafruit_VL53L0X.h"
+
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
 Servo servoOne; 
 Servo servoTwo; 
 Servo servoThree;
 Servo servoFour; 
+Servo servoLock;
 
 int openingDelay = 70;
 
@@ -11,6 +15,8 @@ long timeOfDay = 0;
 long secondsInADay = 86400;
 int timeStep = 900; // Time step in actual milliseconds
 
+int pinLock = 5;
+int pinButton = 6;
 int pinBuzzer = 7;
 int pinOne = 8;
 int pinTwo = 9;
@@ -21,10 +27,21 @@ int angleOne = 90;
 int angleTwo = 90; 
 int angleThree = 90;
 int angleFour = 90;
+int angleLock = 0;
+bool buttonToggle = false;
 
 bool arePillsIn(){
   bool r = false;
-  r = digitalRead(pinSensor);
+  VL53L0X_RangingMeasurementData_t measure;
+  lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
+   if (measure.RangeStatus != 4) {  // phase failures have incorrect data
+    Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
+    if(measure.RangeMilliMeter < 100){
+      r = true;
+    }
+  } else {
+    Serial.println(" out of range ");
+  }
   Serial.print("Sensor detects: ");Serial.println(r);
   return r;
 }
@@ -36,6 +53,16 @@ void beeper(){
     digitalWrite(pinBuzzer,LOW);
     delay(100);
   }
+}
+
+void toggleLock(){
+  if(angleLock == 180){
+    angleLock = 0;
+  } else {
+    angleLock = 180;
+  }
+  servoLock.write(angleLock);
+  delay(150);
 }
 
 void openA(int n){
@@ -128,13 +155,22 @@ void openH(int n){
 
 void setup() {
   Serial.begin(9600);
+  Serial.println("Adafruit VL53L0X test");
+  if (!lox.begin()) {
+    Serial.println(F("Failed to boot VL53L0X"));
+    while(1);
+  }
+  // power 
+  Serial.println(F("Pill sensor in range\n\n")); 
   servoOne.attach(pinOne);
   servoTwo.attach(pinTwo);
   servoThree.attach(pinThree);
   servoFour.attach(pinFour);
+  servoLock.attach(pinLock);
   pinMode(pinBuzzer, OUTPUT);
   pinMode(pinSensor,INPUT);
-  servoOne.write(90); servoTwo.write(90); servoThree.write(90); servoFour.write(90);
+  pinMode(pinButton,INPUT);
+  servoOne.write(90); servoTwo.write(90); servoThree.write(90); servoFour.write(90);servoLock.write(angleLock);
 }
 
 void loop() {
@@ -224,5 +260,8 @@ void loop() {
   };
   timeOfDay = timeOfDay + timeStep;
   if (timeOfDay >= secondsInADay) {timeOfDay = 0;}
+  if(digitalRead(pinButton) == LOW){
+    toggleLock();
+  }
   delay(timeStep);
 }
