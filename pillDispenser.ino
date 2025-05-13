@@ -1,6 +1,9 @@
 #include <Servo.h>
 
-Servo servoOne, servoTwo, servoThree, servoFour; 
+Servo servoOne; 
+Servo servoTwo; 
+Servo servoThree;
+Servo servoFour; 
 
 int openingDelay = 70;
 
@@ -8,16 +11,32 @@ long timeOfDay = 0;
 long secondsInADay = 86400;
 int timeStep = 900; // Time step in actual milliseconds
 
+int pinBuzzer = 7;
 int pinOne = 8;
 int pinTwo = 9;
 int pinThree = 10;
 int pinFour = 11;
+int pinSensor = 12;
 int angleOne = 90; 
 int angleTwo = 90; 
 int angleThree = 90;
 int angleFour = 90;
 
+bool arePillsIn(){
+  bool r = false;
+  r = digitalRead(pinSensor);
+  Serial.print("Sensor detects: ");Serial.println(r);
+  return r;
+}
 
+void beeper(){
+  for(int i = 0; i < 3; i++){
+    digitalWrite(pinBuzzer,HIGH);
+    delay(100);
+    digitalWrite(pinBuzzer,LOW);
+    delay(100);
+  }
+}
 
 void openA(int n){
   for(int i = 0; i < n; i++){
@@ -113,6 +132,8 @@ void setup() {
   servoTwo.attach(pinTwo);
   servoThree.attach(pinThree);
   servoFour.attach(pinFour);
+  pinMode(pinBuzzer, OUTPUT);
+  pinMode(pinSensor,INPUT);
   servoOne.write(90); servoTwo.write(90); servoThree.write(90); servoFour.write(90);
 }
 
@@ -197,6 +218,10 @@ void loop() {
           break;
       }
   }
+  if(arePillsIn()) {
+    Serial.println("Pills are in... beeping...");
+    beeper();
+  };
   timeOfDay = timeOfDay + timeStep;
   if (timeOfDay >= secondsInADay) {timeOfDay = 0;}
   delay(timeStep);
