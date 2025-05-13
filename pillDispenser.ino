@@ -33,10 +33,16 @@ bool buttonToggle = false;
 bool arePillsIn(){
   bool r = false;
   VL53L0X_RangingMeasurementData_t measure;
+  double average = 0.0;
   lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
    if (measure.RangeStatus != 4) {  // phase failures have incorrect data
-    Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
-    if(measure.RangeMilliMeter < 100){
+    //Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
+    for(int i = 0; i < 10; i++){
+      average += measure.RangeMilliMeter;
+      delay(10);
+    }
+    average = average/10;
+    if(average < 101.0){
       r = true;
     }
   } else {
