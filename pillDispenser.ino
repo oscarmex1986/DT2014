@@ -1,5 +1,9 @@
 #include <Servo.h>
 #include "Adafruit_VL53L0X.h"
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
@@ -42,7 +46,7 @@ bool arePillsIn(){
       delay(10);
     }
     average = average/10;
-    if(average < 101.0){
+    if(average < 104.0){
       r = true;
     }
   } else {
@@ -68,7 +72,7 @@ void toggleLock(){
     angleLock = 180;
   }
   servoLock.write(angleLock);
-  delay(150);
+  delay(110);
 }
 
 void openA(int n){
@@ -177,6 +181,21 @@ void setup() {
   pinMode(pinSensor,INPUT);
   pinMode(pinButton,INPUT);
   servoOne.write(90); servoTwo.write(90); servoThree.write(90); servoFour.write(90);servoLock.write(angleLock);
+
+  //Initialize display
+  lcd.init();                      // initialize the lcd 
+  lcd.init();
+  // Print a message to the LCD.
+  lcd.backlight();
+  lcd.setCursor(0,0);
+  lcd.print("Pill dispenser");
+  lcd.setCursor(2,1);
+  lcd.print("Initalizing...");
+   lcd.setCursor(0,2);
+  lcd.print("...");
+   lcd.setCursor(2,3);
+  lcd.print("Initializing...");
+  lcd.clear();
 }
 
 void loop() {
@@ -185,9 +204,26 @@ void loop() {
   long h = (timeOfDay/3600); 
   long m = (timeOfDay -(3600*h))/60;
   long s = (timeOfDay -(3600*h)-(m*60));
+  
+  // For demo purposes only
+  // Doses occur every 8 or 12 hours, and at 9:00 pm
+  int timeToEight = 8 - h%8;
+  int timeToTwelve = 12 - h%12;
+  int timeToNine = 21 - h;
+  
+  Serial.print(min(timeToNine,min(timeToEight,timeToTwelve)));Serial.println(" for the next dose");
 
   Serial.print(timeOfDay);Serial.print(" - ");Serial.print(h);Serial.print(":");Serial.print(m);Serial.print(":");Serial.println(s);
-
+  if(m==0) {
+    lcd.clear();
+    lcd.setCursor(0, 0);lcd.print(h);lcd.print(":");lcd.print("0");lcd.print(m);lcd.print(" ");lcd.print(min(timeToNine,min(timeToEight,timeToTwelve)));
+    lcd.print("h for next");  
+  } else {
+    lcd.clear();
+    lcd.setCursor(0, 0);lcd.print(h);lcd.print(":");lcd.print(m);lcd.print(" ");lcd.print(min(timeToNine,min(timeToEight,timeToTwelve)));
+    lcd.print("h for next");  
+  }
+  
   //Pills for every 8 hours: A, C, H
   int doseEight[] = {1,3,8};
   //Pills for every 12 hours: D, G
@@ -262,11 +298,14 @@ void loop() {
   }
   if(arePillsIn()) {
     Serial.println("Pills are in... beeping...");
+    lcd.setCursor(0, 1);
+    lcd.print("Pills are in!");
     beeper();
-  };
+  } 
   timeOfDay = timeOfDay + timeStep;
-  if (timeOfDay >= secondsInADay) {timeOfDay = 0;}
+  if (timeOfDay >= secondsInADay) {timeOfDay = 0;lcd.clear();}
   if(digitalRead(pinButton) == LOW){
+    Serial.println("Button Pressed...");
     toggleLock();
   }
   delay(timeStep);
