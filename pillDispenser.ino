@@ -13,7 +13,7 @@ Servo servoThree;
 Servo servoFour; 
 Servo servoLock;
 
-int openingDelay = 140;
+int openingDelay = 80;
 
 long timeOfDay = 0;
 long secondsInADay = 86400;
