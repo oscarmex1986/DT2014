@@ -13,7 +13,7 @@ Servo servoThree;
 Servo servoFour; 
 Servo servoLock;
 
-int openingDelay = 70;
+int openingDelay = 140;
 
 long timeOfDay = 0;
 long secondsInADay = 86400;
@@ -217,11 +217,11 @@ void loop() {
   if(m==0) {
     lcd.clear();
     lcd.setCursor(0, 0);lcd.print(h);lcd.print(":");lcd.print("0");lcd.print(m);lcd.print(" ");lcd.print(min(timeToNine,min(timeToEight,timeToTwelve)));
-    lcd.print("h for next");  
+    lcd.print("t kvar");  
   } else {
     lcd.clear();
     lcd.setCursor(0, 0);lcd.print(h);lcd.print(":");lcd.print(m);lcd.print(" ");lcd.print(min(timeToNine,min(timeToEight,timeToTwelve)));
-    lcd.print("h for next");  
+    lcd.print("t kvar");  
   }
   
   //Pills for every 8 hours: A, C, H
