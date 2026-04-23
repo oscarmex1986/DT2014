@@ -1,7 +1,7 @@
 // Variables to keep control of the time
-int step = 100;
-int timeCounter = 0;
-int timeLimit = 30000;
+long step = 100;
+long timeCounter = 0;
+long timeLimit = 30000;
 
 // Variable to add headers to the csv file
 bool firstTime = true;
@@ -17,6 +17,7 @@ void loop() {
   if(digitalRead(7) == HIGH && timeCounter <= timeLimit){
     if(firstTime == true){
       Serial.println("time,light,temp");
+      firstTime == false;
     }
     Serial.print(timeCounter);
     Serial.print(",");
