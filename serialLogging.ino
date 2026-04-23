@@ -17,7 +17,7 @@ void loop() {
   if(digitalRead(7) == HIGH && timeCounter <= timeLimit){
     if(firstTime == true){
       Serial.println("time,light,temp");
-      firstTime == false;
+      firstTime = false;
     }
     Serial.print(timeCounter);
     Serial.print(",");
