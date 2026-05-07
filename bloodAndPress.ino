@@ -48,7 +48,7 @@ void loop() {
     digitalWrite(ledRed,HIGH);
     digitalWrite(ledGreen,LOW);
   }
-  Serial.println(pressure);
+  Serial.println(pressure); // R
 
   delay(100);
 }
